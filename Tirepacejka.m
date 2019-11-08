@@ -57,17 +57,17 @@ classdef Tirepacejka
             Mz0 = Dz*sin(self.Cz*atan(Bz*alphaeq - self.Ez*(Bz*alphaeq - atan(Bz*alphaeq))));
             Mz = (muy*Fz/(self.muy0*self.Fz0))*(Cma/Cma0)*(Cfa0/Cfa)*Mz0 + Mzr;
         end
-        function[] = plottire(self,Fz)
+        function[] = plottire(self,Fz,mux,muy)
             k = [-pi/12:0.001:pi/12];
             alpha = [-pi/12:0.001:pi/12];
-            [fx,fy,Mz,Alpha] = self.lateralforce(alpha,k,Fz,1.26,1);
-            plot(Alpha,30*Mz,'r')
+            [fx,fy,Mz,Alpha] = self.lateralforce(alpha,k,Fz,mux,muy);
+            plot(Alpha*180/pi,30*Mz,'r')
             hold on
-            plot(k,fx,'b')
-            plot(Alpha,fy,'g')
+            plot(k*180/pi,fx,'b')
+            plot(Alpha*180/pi,fy,'g')
             grid on
             legend(['30Mz';'  Fx';'  Fy']);
-            xlabel('Slip Angle(deg)');
+            xlabel('Slip Angle(longitudinal/lateral)(deg)');
             %ylabel('Lateral Force(Fy)');
         end
     end
