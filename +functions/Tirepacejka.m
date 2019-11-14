@@ -26,7 +26,7 @@ classdef Tirepacejka
             self.c11 = 4;
             self.camber = pi/18;
         end
-        function[fx,fy,Mz] = lateralforce(self,alpha,k,Fz,mux,muy)
+        function[fx,fy,Mz] = tireforce(self,alpha,k,Fz,mux,muy)
             %% Lateral Force
             Cfa0 = 30e3;
             Cfa = self.c1*self.c2*self.Fz0*sin(2*atan(Fz/(self.c2*self.Fz0)));
@@ -58,9 +58,9 @@ classdef Tirepacejka
             Mz = (muy*Fz/(self.muy0*self.Fz0))*(Cma/Cma0)*(Cfa0/Cfa)*Mz0 + Mzr;
         end
         function[] = plottire(self,Fz,mux,muy)
-            k = [-pi/12:0.001:pi/12];
-            alpha = [-pi/12:0.001:pi/12];
-            [fx,fy,Mz] = self.lateralforce(alpha,k,Fz,mux,muy);
+            k = (-pi/12:0.001:pi/12);
+            alpha = (-pi/12:0.001:pi/12);
+            [fx,fy,Mz] = self.tireforce(alpha,k,Fz,mux,muy);
             plot(alpha*180/pi,30*Mz,'r')
             hold on
             plot(k*180/pi,fx,'b')
