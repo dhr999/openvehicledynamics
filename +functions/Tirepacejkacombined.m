@@ -1,5 +1,5 @@
 classdef Tirepacejkacombined  % Based on MF-Tire 6.1 by TNO, The Netherlands
-    % Tire Used 205/60R15 91 V
+    % Tire Used 205./60R15 91 V
     methods
         function self = Tirepacejkacombined()
             self.V0=16.7;
@@ -46,7 +46,7 @@ classdef Tirepacejkacombined  % Based on MF-Tire 6.1 by TNO, The Netherlands
             self.pEy3=0.09854;
             self.pEy4=-6.697;
             self.pEy5=0;
-            self.pKy1=-15.324;
+            self.pKy1=15.324;
             self.pKy2=1.715;
             self.pKy3=0.3695;
             self.pKy4=2.0005;
@@ -79,75 +79,67 @@ classdef Tirepacejkacombined  % Based on MF-Tire 6.1 by TNO, The Netherlands
             self.rVy4=94.63;
             self.rVy5=1.8914;
             self.rVy6=23.8;
-            self.camber = pi/18;
+            self.pFz1 = 0.7098;
+            self.qV1 = 7.742e-4;
+            self.camber = pi./18;
         end
         function[fx,fy] = tireforce(self,V,Fz,omega)
-            dpi = (pi-self.pi0)/self.pi0;
-            cz = self.cz0*(1+pFz1*dpi);
-            r = self.r0*(self.qreo + qV1*(self.r0*omega/self.V0));
-            re = r - (self.Fz0/cz)*(self.Freff*Fz/self.self.Fz0 + self.Dreff*atan(self.Breff*Fz/self.Fz0));
-            Vcx = V(1); Vcy = V(2); Vsx = Vcx - re*omega;
-            Fz0dash = lambdaFz0*self.Fz0;
-            dfz = (Fz - Fz0dash)/Fz0dash;
+            %         function[fx,fy] = tireforce(self,k,alpha1,Fz)
+            dpi = (pi-self.pi0)./self.pi0;
+            cz = self.cz0.*(1+self.pFz1.*dpi);
+            r = self.r0.*(self.qreo + self.qV1.*(self.r0.*omega./self.V0));
+            re = r - (self.Fz0./cz).*(self.Freff.*Fz./self.Fz0 + self.Dreff.*atan(self.Breff.*Fz./self.Fz0));
+            Vcx = V(1); Vcy = V(2); Vsx = Vcx - re.*omega;
+            Fz0dash = self.Fz0;
+            dfz = (Fz - Fz0dash)./Fz0dash;
             camber1 = sin(self.camber);
-            alpha1 = -Vcy/abs(Vcx);
-            k = -Vsx/abs(Vcx);
+            alpha1 = -Vcy./abs(Vcx);
+            k = -Vsx./abs(Vcx);
             %%Longitudinal Force
             %%Pure Slip
-            SVx = Fz*(self.pVx1 + self.pVx2*dfz)*lambdaVx*lambdamuxdash*zeta1;
-            Shx = (self.pHx1 + self.pHx2*dfz)*lambdaHx;
-            Cx = self.pCx1*lambdaCx;
-            mux = (self.pDx1 + self.pDx3*dfz)*(1+self.ppx3*dpi+self.ppx4*dpi^2)*(1-self.pDx3*self.camber^2)*lambdamuxstar;
-            Dx = mux*Fz*zeta1;
-            Ex = (self.pEx1 + self.pEx2*dfz + self.pEx3*dfz^2)*(1-self.pEx4*sign(k))*lambdaEx;
-            Kxk = Fz*(self.pKx1 + self.pKx2*dfz)*exp(self.pKx3*dfz)*(1+self.ppx1*dpi+self.ppx2*dpi^2)*lambdaKxk;
-            Bx = Kxk / (Cx*Dx+epsilonx);
+            SVx = Fz.*(self.pVx1 + self.pVx2.*dfz);
+            Shx = (self.pHx1 + self.pHx2.*dfz);
+            Cx = self.pCx1;
+            mux = (self.pDx1 + self.pDx3.*dfz).*(1+self.ppx3.*dpi+self.ppx4.*dpi^2).*(1-self.pDx3.*self.camber^2);
+            Dx = mux.*Fz;
+            Ex = (self.pEx1 + self.pEx2.*dfz + self.pEx3.*dfz^2).*(1-self.pEx4.*sign(k));
+            Kxk = Fz.*(self.pKx1 + self.pKx2.*dfz).*exp(self.pKx3.*dfz).*(1+self.ppx1.*dpi+self.ppx2.*dpi^2);
+            Bx = Kxk ./ (Cx.*Dx);
             keq = k + Shx;
-            fx0 = Dx*sin(Cx*atan(Bx*keq-Ex*(Bx*keq - atan(Bx*keq))))+SVx;
+            fx0 = Dx.*sin(Cx.*atan(Bx.*keq-Ex.*(Bx.*keq - atan(Bx.*keq))))+SVx;
             %%Combined Slip
             SHxa = self.rHx1;
-            Exa = self.rEx1 + self.rEx2*dfz;
+            Exa = self.rEx1 + self.rEx2.*dfz;
             Cxa = self.rCx1;
-            Bxa = (self.rBx1 + self.rBx3*self.camber^2)*cos(atan(self.rBx2*k))*lambdaxa;
-            alphas = alpha1 + SHxa; %alpha1 = -Vcy/|Vcx|
-            Gxa0 = cos(Cxa*atan(Bxa*SHxa-Exa*(Bxa*SHxa-atan(Bxa*SHxa))));
-            Gxa = cos(Cxa*atan(Bxa*alphas-Exa*(Bxa*alphas-atan(Bxa*alphas))))/Gxa0;
-            fx = Gxa*fx0;
+            Bxa = (self.rBx1 + self.rBx3.*self.camber^2).*cos(atan(self.rBx2.*k));
+            alphas = alpha1 + SHxa; %alpha1 = -Vcy./|Vcx|
+            Gxa0 = cos(Cxa.*atan(Bxa.*SHxa-Exa.*(Bxa.*SHxa-atan(Bxa.*SHxa))));
+            Gxa = cos(Cxa.*atan(Bxa.*alphas-Exa.*(Bxa.*alphas-atan(Bxa.*alphas))))./Gxa0;
+            fx = Gxa.*fx0;
             %%Latreal Forces
             %Pure Slip
-            SVyY = Fz*(self.pVy3 + self.pVy4*dfz)*camber1*lambdaKyY*lambdamuydash*zeta2;
-            SVy = Fz*(self.pVy1 + self.pVy2*dfz)*lambdaVy*lamdamuydash*zeta2 + SVyY;
-            Kya = self.pKy1*Fz0dash*(1+self.ppy1*dpi)*(1-self.pKy3*abs(camber1))*sin(self.pKy4*atan((Fz/Fz0dash)/((self.pKy2+self.pKy5*camber1^2)*(1+self.ppy2*dpi))))*zeta3*lambdaKya;
-            SHy = (self.pHy1 + self.pHy2*dfz)*lambdaHy + ((KyY0*camber1 - SVyY)/(Kya+epsilonk))*zeta0 + zeta4 -1;
+            SVyY = Fz.*(self.pVy3 + self.pVy4.*dfz).*camber1;
+            SVy = Fz.*(self.pVy1 + self.pVy2.*dfz) + SVyY;
+            Kya = self.pKy1.*Fz0dash.*(1+self.ppy1.*dpi).*(1-self.pKy3.*abs(camber1)).*sin(self.pKy4.*atan((Fz./Fz0dash)./((self.pKy2+self.pKy5.*camber1^2).*(1+self.ppy2.*dpi))));
+            SHy = (self.pHy1 + self.pHy2.*dfz);
             ay = alpha1 + SHy;
-            Cy = self.pCy1*lambdaCy;
-            muy = (self.pDy1 + self.pDy2*dfz)*(1+self.ppy3*dpi+self.ppy4*dpi^2)*(1-self.pDy3*camber1^2)*lambdamuystar;
-            Dy = muy*Fz*zeta2;
-            Ey = (self.pEy1 + self.pEy2*dfz)*(1+self.pEy5*camber1^2-(self.pEy3 + self.pEy4*camber1)*sign(ay))*lambdaEy;
-            By = Kya/(Cy*Dy + epsilony);
-            fy0 = Dx*sin(Cy*atan(By*ay-Ey*(By*ay - atan(By*ay))))+SVy;
+            Cy = self.pCy1;
+            muy = (self.pDy1 + self.pDy2.*dfz).*(1+self.ppy3.*dpi+self.ppy4.*dpi^2).*(1-self.pDy3.*camber1^2);
+            Dy = muy.*Fz;
+            Ey = (self.pEy1 + self.pEy2.*dfz).*(1+self.pEy5.*camber1^2-(self.pEy3 + self.pEy4.*camber1).*sign(ay));
+            By = Kya./(Cy.*Dy);
+            fy0 = Dx.*sin(Cy.*atan(By.*ay-Ey.*(By.*ay - atan(By.*ay))))+SVy;
             %Combined Slip
-            DVyk = muy*Fz*(self.rVy1 + self.rVy2*dfz + self.rVy3*camber1)*cos(atan(self.rVy4*alpha1))*zeta2;
-            SVyk = DVyk*sin(self.rVy5*atan(self.rVy6*k))*lambdaVyk;
-            SHyk = self.rHy1 + self.rHy2*dfz;
-            Eyk = self.rEy1 + self.rEy2*dfz;
+            DVyk = muy.*Fz.*(self.rVy1 + self.rVy2.*dfz + self.rVy3.*camber1).*cos(atan(self.rVy4.*alpha1));
+            SVyk = DVyk.*sin(self.rVy5.*atan(self.rVy6.*k));
+            SHyk = self.rHy1 + self.rHy2.*dfz;
+            Eyk = self.rEy1 + self.rEy2.*dfz;
             Cyk = self.rCy1;
-            Byk = (self.rBy1 + self.rBy4*camber1^2)*cos(atan(self.rBy2*(alpha1-self.rBy3)))*lambdayk;
+            Byk = (self.rBy1 + self.rBy4.*camber1^2).*cos(atan(self.rBy2.*(alpha1-self.rBy3)));
             ks = k + SHyk;
-            Gyk0 = cos(Cyk*atan(Byk*SHyk-Eyk*(Byk*SHyk-atan(Byk*SHyk))));
-            Gyk = cos(Cyk*atan(Byk*ks-Eyk*(Byk*ks-atan(Byk*ks))))/Gyk0;
-            fy = Gyk*fy0+SVyk;
-        end
-        function[] = plottire(self,Fz,V,omega)
-            [fx,fy,Mz] = self.tireforce(V,Fz,omega);
-            plot(alpha*180/pi,30*Mz,'r')
-            hold on
-            plot(k*180/pi,fx,'b')
-            plot(alpha*180/pi,fy,'g')
-            grid on
-            legend(['30Mz';'  Fx';'  Fy']);
-            xlabel('Slip Angle(longitudinal/lateral)(deg)');
-            %ylabel('Lateral Force(Fy)');
+            Gyk0 = cos(Cyk.*atan(Byk.*SHyk-Eyk.*(Byk.*SHyk-atan(Byk.*SHyk))));
+            Gyk = cos(Cyk.*atan(Byk.*ks-Eyk.*(Byk.*ks-atan(Byk.*ks))))./Gyk0;
+            fy = Gyk.*fy0+SVyk;
         end
     end
     properties
@@ -228,6 +220,8 @@ classdef Tirepacejkacombined  % Based on MF-Tire 6.1 by TNO, The Netherlands
         rVy4
         rVy5
         rVy6
+        pFz1
+        qV1
         camber
     end
 end
