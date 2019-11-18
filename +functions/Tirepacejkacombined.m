@@ -83,7 +83,7 @@ classdef Tirepacejkacombined  % Based on MF-Tire 6.1 by TNO, The Netherlands
             self.qV1 = 7.742e-4;
             self.camber = pi./18;
         end
-        function[fx,fy] = tireforce(self,V,Fz,omega)
+        function[fx,fy] = tireforce(self,V,omega,Fz)
             %         function[fx,fy] = tireforce(self,k,alpha1,Fz)
             dpi = (pi-self.pi0)./self.pi0;
             cz = self.cz0.*(1+self.pFz1.*dpi);
