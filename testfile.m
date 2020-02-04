@@ -2,8 +2,9 @@ close all;
 clear variables;
 clc;
 tire = functions.Tirepacejkacombined;
-tire.camber =0;
-[fx,fy] = tire.tireforce([22 2],78,4000)
+V = [82*5/18 7.8*5/18];
+omega =  656*2*pi/60;
+[fx,fy] = tire.tireforce(V, omega,4800)
 % r = 2*pi/180;
 % alpha = linspace(-r*2,r*5,10);
 % k = linspace(-r*5,r*5,100);
