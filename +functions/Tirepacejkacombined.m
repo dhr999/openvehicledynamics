@@ -82,6 +82,7 @@ classdef Tirepacejkacombined  % Based on MF-Tire 6.1 by TNO, The Netherlands
             self.pFz1 = 0.7098;
             self.qV1 = 7.742e-4;
             self.camber = -pi./180;
+            self.Iw = 1.1;
         end
         function[fx,fy] = tireforce(self,V,omega,Fz,delta,a,psidot)
             %         function[fx,fy] = tireforce(self,k,alpha1,Fz)
@@ -103,7 +104,7 @@ classdef Tirepacejkacombined  % Based on MF-Tire 6.1 by TNO, The Netherlands
             Cx = self.pCx1;
             mux = (self.pDx1 + self.pDx3.*dfz).*(1+self.ppx3.*dpi+self.ppx4.*dpi^2).*(1-self.pDx3.*self.camber^2);
             Dx = mux.*Fz;
-            Ex = (self.pEx1 + self.pEx2.*dfz + self.pEx3.*dfz^2).*(1-self.pEx4.*sign(k));
+            Ex = (self.pEx1 + self.pEx2.*dfz + self.pEx3.*dfz.^2).*(1-self.pEx4.*sign(k));
             Kxk = Fz.*(self.pKx1 + self.pKx2.*dfz).*exp(self.pKx3.*dfz).*(1+self.ppx1.*dpi+self.ppx2.*dpi^2);
             Bx = Kxk ./ (Cx.*Dx);
             keq = k + Shx;
@@ -224,5 +225,6 @@ classdef Tirepacejkacombined  % Based on MF-Tire 6.1 by TNO, The Netherlands
         pFz1
         qV1
         camber
+        Iw
     end
 end

@@ -1,22 +1,22 @@
 classdef vehicle_model
     methods
         function self = vehicle_model()
-            self.m = 1425;
-            self.ms = 1050;
-            self.a = 1.03;
-            self.b = 1.55;
+            self.m = 1760;
+            self.ms = 1590;
+            self.a = 1.18;
+            self.b = 1.77;
             self.l = 2.5;
-            self.tf = 1.54;
-            self.tr = 1.52;
-            self.Iz = 2500;
-            self.Ix = 550;
+            self.t = 1.575;
+            self.Iz = 2687.1;
+            self.Ix = 894.4;
             self.Iy = 350;
-            self.hcg = 0.5;
-            self.zcg = 0.1;
-            self.Kphi = 76.8e3;
-            self.Dphi = 3000e3;
+            self.hcg = 0.72;
+            self.zcg = 0.15;
+            self.Kphi = 189e3;
+            self.Dphi = 6e3;
             self.Ktheta = 60e3;
             self.Dtheta = 3000e3;
+            self.r0 = 0.3135;
         end
         function[state] = vehicleforce(self, driver_input)
             g = 9.81;
@@ -28,10 +28,23 @@ classdef vehicle_model
             h = self.hcg - self.zcg;
             tyre = functions.Tirepacejkacombined;
             
-            T = [driver_input(1),driver_input(2)];  %Torque to left and right wheel
+            ti = 0;
+            tstep = 0.001;
+            tf = ti + tstep;
+            z = 1;
+            end_time = 10.0;
+            [fx,fy] = 
+            while tf<end_time
+                T = [0;0;driver_input(z,1);driver_input(z,2)];  %Torque to left and right wheel
+                [~,omega] = ode45(,[ti tf],init_cond);
+            end
             
+            %% Wheel Dynamics
+            function dy = wheeldyna(~,y)
+                dy =  T - self.ro*fx;;
+            end
             %% DT-roll pitch model
-            function dy = eqs(~,y)
+            function dy = bodydyna(~,y)
                 dy = zeros([8 1]);    %[pitch,roll,yaw,pitch rate,roll rate,yaw rate,Vx,Vy]
                 dy(1) = y(4);
                 dy(2) = y(5);
@@ -47,7 +60,7 @@ classdef vehicle_model
     properties
         m  %Total Mass of the vehicle
         ms %Sprung Mass of the vehicle
-        tf;tr %Trackwidth
+        t %Trackwidth
         l %Wheelbase
         a %Distance of the CG from front axle
         b %Distance of the CG from the rear axle
@@ -60,5 +73,6 @@ classdef vehicle_model
         Dtheta
         Kphi
         Dphi
+        r0
     end
 end
