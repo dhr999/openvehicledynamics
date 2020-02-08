@@ -17,8 +17,9 @@ classdef vehicle_model
             self.Ktheta = 60e3;
             self.Dtheta = 3000e3;
             self.r0 = 0.3135;
+            self.Iw = 1.1;
         end
-        function[state] = vehicleforce(self, driver_input)
+        function[state] = vehicle(self, driver_input)
             g = 9.81;
             Ixx = self.Ix;
             Iyy = self.Iy;
@@ -27,21 +28,37 @@ classdef vehicle_model
             Ixy = Ixx - Iyy;
             h = self.hcg - self.zcg;
             tyre = functions.Tirepacejkacombined;
+            dist = [self.a;self.a;self.b;self.b];
             
             ti = 0;
             tstep = 0.001;
             tf = ti + tstep;
-            z = 1;
             end_time = 10.0;
-            [fx,fy] = 
+            z = 1;
+            steps = (end_time - ti)/tstep;
+            
+            %% Init Cond
+            V = [70 0]*5/18;
+            omega = V(1)/self.ro*ones([4 1]);
+            Fz = self.m/4*ones([4 1]);
+            state = zeros([z 8]);
+            
+            [fx,fy] = tyre.tireforce(V,omega,Fz,delta,dist,state(z,6));
+            
             while tf<end_time
+                tf = ti + tstep;
                 T = [0;0;driver_input(z,1);driver_input(z,2)];  %Torque to left and right wheel
-                [~,omega] = ode45(,[ti tf],init_cond);
+            delta = [driver_input(z,3);driver_input(z,4);0;0];
+                init_cond = 
+                [~,omega] = ode45(@wheeldyna,[ti tf],init_cond);
+                [fx,fy] = tyre.tireforce(V,omega,Fz,delta,dist,state(z.6));
+                
+                
             end
             
             %% Wheel Dynamics
-            function dy = wheeldyna(~,y)
-                dy =  T - self.ro*fx;;
+            function dy = wheeldyna(~,~)
+                dy =  (T - self.ro*fx)/self.Iw;
             end
             %% DT-roll pitch model
             function dy = bodydyna(~,y)
@@ -74,5 +91,6 @@ classdef vehicle_model
         Kphi
         Dphi
         r0
+        Iw
     end
 end
