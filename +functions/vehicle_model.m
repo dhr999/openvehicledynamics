@@ -16,7 +16,7 @@ classdef vehicle_model
             self.Dphi = 6e3;
             self.Ktheta = 60e3;
             self.Dtheta = 3000e3;
-            self.r0 = 0.3135;
+            self.r0 = 0.2986;
             self.Iw = 1.1;
         end
         function[state] = vehicle(self, driver_input)
@@ -31,9 +31,9 @@ classdef vehicle_model
             dist = [self.a;self.a;self.b;self.b];
             
             ti = 0;
-            tstep = 0.001;
+            tstep = 0.005;
             tf = ti + tstep;
-            end_time = 1;
+            end_time = 10;
             z = 1;
             steps = (end_time - ti)/tstep;
             
@@ -43,12 +43,10 @@ classdef vehicle_model
             Fz = self.m/4*ones([4 1]);
             state = zeros([steps 8]);
             fx = zeros([4 1]);
-            fy = zeros([4 1]);
+            state(z,7:8) = V;
             
             while tf<end_time
-                tf = ti + tstep;
                 T = [0;0;driver_input(z,1);driver_input(z,2)];  %Torque to left and right wheel
-                
                 delta = [driver_input(z,3);driver_input(z,4);0;0];
                 [~,omega] = ode45(@wheeldyna,[ti tf],omega);
                 omega = omega(end,:)';
@@ -56,11 +54,12 @@ classdef vehicle_model
                 Fx = fx(1)*cos(delta(1)) - fy(1)*sin(delta(1)) + fx(2)*cos(delta(2)) - fy(2)*sin(delta(2)) + fx(3) + fx(4);
                 Fy = fy(1)*cos(delta(1)) + fx(1)*sin(delta(1)) + fy(2)*cos(delta(2)) + fx(2)*sin(delta(2)) + fy(3) + fy(4);
                 Mz = self.a*(fy(1)*cos(delta(1)) + fx(1)*sin(delta(1)) + fy(2)*cos(delta(2)) + fx(2)*sin(delta(2))) - self.b*(fy(3) + fy(4)) + self.t*(-fx(1)*cos(delta(1)) + fy(1)*sin(delta(1)) + fx(2)*cos(delta(2)) - fy(2)*sin(delta(2)) - fx(3) - fx(4));
+                disp(fx)
                 [~,y] = ode45(@bodydyna,[ti tf],(state(z,:))');
-                disp(z)
                 z=z+1;
                 state(z,:) = y(end,:);
                 ti=tf;
+                tf = ti + tstep;
             end
             
             %% Wheel Dynamics
