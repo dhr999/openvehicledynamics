@@ -33,32 +33,39 @@ classdef vehicle_model
             ti = 0;
             tstep = 0.001;
             tf = ti + tstep;
-            end_time = 10.0;
+            end_time = 1;
             z = 1;
             steps = (end_time - ti)/tstep;
             
             %% Init Cond
             V = [70 0]*5/18;
-            omega = V(1)/self.ro*ones([4 1]);
+            omega = V(1)/self.r0*ones([4 1]);
             Fz = self.m/4*ones([4 1]);
-            state = zeros([z 8]);
-            
-            [fx,fy] = tyre.tireforce(V,omega,Fz,delta,dist,state(z,6));
+            state = zeros([steps 8]);
+            fx = zeros([4 1]);
+            fy = zeros([4 1]);
             
             while tf<end_time
                 tf = ti + tstep;
                 T = [0;0;driver_input(z,1);driver_input(z,2)];  %Torque to left and right wheel
-            delta = [driver_input(z,3);driver_input(z,4);0;0];
-                init_cond = 
-                [~,omega] = ode45(@wheeldyna,[ti tf],init_cond);
-                [fx,fy] = tyre.tireforce(V,omega,Fz,delta,dist,state(z.6));
                 
-                
+                delta = [driver_input(z,3);driver_input(z,4);0;0];
+                [~,omega] = ode45(@wheeldyna,[ti tf],omega);
+                omega = omega(end,:)';
+                [fx,fy] = tyre.tireforce(V,omega,Fz,delta,dist,state(z,6));
+                Fx = fx(1)*cos(delta(1)) - fy(1)*sin(delta(1)) + fx(2)*cos(delta(2)) - fy(2)*sin(delta(2)) + fx(3) + fx(4);
+                Fy = fy(1)*cos(delta(1)) + fx(1)*sin(delta(1)) + fy(2)*cos(delta(2)) + fx(2)*sin(delta(2)) + fy(3) + fy(4);
+                Mz = self.a*(fy(1)*cos(delta(1)) + fx(1)*sin(delta(1)) + fy(2)*cos(delta(2)) + fx(2)*sin(delta(2))) - self.b*(fy(3) + fy(4)) + self.t*(-fx(1)*cos(delta(1)) + fy(1)*sin(delta(1)) + fx(2)*cos(delta(2)) - fy(2)*sin(delta(2)) - fx(3) - fx(4));
+                [~,y] = ode45(@bodydyna,[ti tf],(state(z,:))');
+                disp(z)
+                z=z+1;
+                state(z,:) = y(end,:);
+                ti=tf;
             end
             
             %% Wheel Dynamics
             function dy = wheeldyna(~,~)
-                dy =  (T - self.ro*fx)/self.Iw;
+                dy =  (T - self.r0*fx)/self.Iw;
             end
             %% DT-roll pitch model
             function dy = bodydyna(~,y)
