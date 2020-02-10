@@ -51,10 +51,10 @@ classdef vehicle_model
                 [~,omega] = ode45(@wheeldyna,[ti tf],omega);
                 omega = omega(end,:)';
                 [fx,fy] = tyre.tireforce(V,omega,Fz,delta,dist,state(z,6));
+                fy(2) = -fy(2); fy(4) = -fy(4);
                 Fx = fx(1)*cos(delta(1)) - fy(1)*sin(delta(1)) + fx(2)*cos(delta(2)) - fy(2)*sin(delta(2)) + fx(3) + fx(4);
                 Fy = fy(1)*cos(delta(1)) + fx(1)*sin(delta(1)) + fy(2)*cos(delta(2)) + fx(2)*sin(delta(2)) + fy(3) + fy(4);
-                Mz = self.a*(fy(1)*cos(delta(1)) + fx(1)*sin(delta(1)) + fy(2)*cos(delta(2)) + fx(2)*sin(delta(2))) - self.b*(fy(3) + fy(4)) + self.t*(-fx(1)*cos(delta(1)) + fy(1)*sin(delta(1)) + fx(2)*cos(delta(2)) - fy(2)*sin(delta(2)) - fx(3) - fx(4));
-                disp(fx)
+                Mz = self.a*(fy(1)*cos(delta(1)) + fx(1)*sin(delta(1)) + fy(2)*cos(delta(2)) + fx(2)*sin(delta(2))) - self.b*(fy(3) + fy(4)) + self.t*(-fx(1)*cos(delta(1)) + fy(1)*sin(delta(1)) + fx(2)*cos(delta(2)) - fy(2)*sin(delta(2)) - fx(3) + fx(4));
                 [~,y] = ode45(@bodydyna,[ti tf],(state(z,:))');
                 z=z+1;
                 state(z,:) = y(end,:);

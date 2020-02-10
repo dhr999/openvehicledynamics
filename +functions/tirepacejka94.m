@@ -16,8 +16,7 @@ classdef tirepacejka94
             self.a12 = 0;
             self.a13 = 0;
             self.camber = -2;    %radians
-        end
-        
+        end        
         function [fy,Alpha] = lateralForce(self,Fz,alpha)
             ya = self.ya;
             a1 = self.a1;

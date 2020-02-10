@@ -24,50 +24,55 @@ classdef Tirepacejka
             self.c9 = 0.3;
             self.c10 = 0;
             self.c11 = 4;
-            self.camber = pi/18;
+            self.camber = pi./18;
+            self.r = 0.3135;
         end
-        function[fx,fy,Mz] = tireforce(self,alpha,k,Fz,mux,muy)
+        function[fx,fy,Mz] = tireforce(self,V,omega,Fz,delta,a,psidot)
             %% Lateral Force
+            mux = 1.1;muy=1.3;
+            Vcx = V(1); Vcy = V(2); Vsx = Vcx - self.r.*omega;
+            alpha = delta - ((Vcy+a.*psidot)./Vcx);
+            k = -Vsx./abs(Vcx);
             Cfa0 = 30e3;
-            Cfa = self.c1*self.c2*self.Fz0*sin(2*atan(Fz/(self.c2*self.Fz0)));
-            Cfy = self.c5*Fz;
-            Shy = Cfy/Cfa*self.camber;
+            Cfa = self.c1.*self.c2.*self.Fz0.*sin(2.*atan(Fz./(self.c2.*self.Fz0)));
+            Cfy = self.c5.*Fz;
+            Shy = Cfy./Cfa.*self.camber;
             alpha1 = alpha + Shy;
-            alphaeq = (Cfa/Cfa0)*(self.Fz0*self.muy0/(Fz*muy))*alpha1;
-            Dy = self.muy0*self.Fz0;
-            By = Cfa0/(Dy*self.Cy);
-            fy0 = Dy*sin(self.Cy*atan(By*alphaeq-self.Ey*(By*alphaeq - atan(By*alphaeq))));
-            fy = (muy*Fz/(self.muy0*self.Fz0))*fy0;
+            alphaeq = (Cfa./Cfa0).*(self.Fz0.*self.muy0./(Fz.*muy)).*alpha1;
+            Dy = self.muy0.*self.Fz0;
+            By = Cfa0./(Dy.*self.Cy);
+            fy0 = Dy.*sin(self.Cy.*atan(By.*alphaeq-self.Ey.*(By.*alphaeq - atan(By.*alphaeq))));
+            fy = (muy.*Fz./(self.muy0.*self.Fz0)).*fy0;
             %% Longitudinal force
-            Cfk = self.c8*Fz;
+            Cfk = self.c8.*Fz;
             Cfk0 = 40000;
-            keq = (self.mux0*self.Fz0/(mux*Fz))*(Cfk/Cfk0)*k;
-            Dx = self.mux0*self.Fz0;
-            Bx = Cfk0/(Dx*self.Cx);
-            fx0 = Dx*sin(self.Cx*atan(Bx*keq-self.Ex*(Bx*keq - atan(Bx*keq))));
-            fx = (mux*Fz)/(self.mux0*self.Fz0)*fx0;
+            keq = (self.mux0.*self.Fz0./(mux.*Fz)).*(Cfk./Cfk0).*k;
+            Dx = self.mux0.*self.Fz0;
+            Bx = Cfk0./(Dx.*self.Cx);
+            fx0 = Dx.*sin(self.Cx.*atan(Bx.*keq-self.Ex.*(Bx.*keq - atan(Bx.*keq))));
+            fx = (mux.*Fz)./(self.mux0.*self.Fz0).*fx0;
             %% Self aligning Torque
-            Cmy = self.c6*self.b^2/self.re*Cfk;
-            a = self.a0 * sqrt(Fz/self.Fz0);
-            Cma = self.c4*a*Cfa;
+            Cmy = self.c6.*self.b^2./self.re.*Cfk;
+            a = self.a0 .* sqrt(Fz./self.Fz0);
+            Cma = self.c4.*a.*Cfa;
             Cma0 = 1.2e3;
-            Mzr = (Cmy*self.camber + Cma*Shy)./(1+self.c7*alpha.^2);
-            Dz = self.c3*Dy*self.a0;
-            Bz = -Cma0/self.Cz/Dz;
-            Mz0 = Dz*sin(self.Cz*atan(Bz*alphaeq - self.Ez*(Bz*alphaeq - atan(Bz*alphaeq))));
-            Mz = (muy*Fz/(self.muy0*self.Fz0))*(Cma/Cma0)*(Cfa0/Cfa)*Mz0 + Mzr;
+            Mzr = (Cmy.*self.camber + Cma.*Shy)./(1+self.c7.*alpha.^2);
+            Dz = self.c3.*Dy.*self.a0;
+            Bz = -Cma0./self.Cz./Dz;
+            Mz0 = Dz.*sin(self.Cz.*atan(Bz.*alphaeq - self.Ez.*(Bz.*alphaeq - atan(Bz.*alphaeq))));
+            Mz = (muy.*Fz./(self.muy0.*self.Fz0)).*(Cma./Cma0).*(Cfa0./Cfa).*Mz0 + Mzr;
         end
         function[] = plottire(self,Fz,mux,muy)
             k = (-pi/12:0.001:pi/12);
             alpha = (-pi/12:0.001:pi/12);
             [fx,fy,Mz] = self.tireforce(alpha,k,Fz,mux,muy);
-            plot(alpha*180/pi,30*Mz,'r')
+            plot(alpha.*180./pi,30.*Mz,'r')
             hold on
-            plot(k*180/pi,fx,'b')
-            plot(alpha*180/pi,fy,'g')
+            plot(k.*180./pi,fx,'b')
+            plot(alpha.*180./pi,fy,'g')
             grid on
             legend(['30Mz';'  Fx';'  Fy']);
-            xlabel('Slip Angle(longitudinal/lateral)(deg)');
+            xlabel('Slip Angle(longitudinal./lateral)(deg)');
             %ylabel('Lateral Force(Fy)');
         end
     end
@@ -96,5 +101,6 @@ classdef Tirepacejka
         c10
         c11
         camber
+        r
     end
 end
