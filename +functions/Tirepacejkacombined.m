@@ -84,17 +84,21 @@ classdef Tirepacejkacombined  % Based on MF-Tire 6.1 by TNO, The Netherlands
             self.camber = -0;
             self.Iw = 1.1;
         end
-        function[fx,fy] = tireforce(self,V,omega,Fz,delta,a,psidot)
+        function[fx,fy] = tireforce(self,V,omega,Fz,delta)
             %         function[fx,fy] = tireforce(self,k,alpha1,Fz)
             dpi = (pi-self.pi0)./self.pi0;
             cz = self.cz0.*(1+self.pFz1.*dpi);
             r = self.r0.*(self.qreo + self.qV1.*(self.r0.*omega./self.V0));
             re = r - (self.Fz0./cz).*(self.Freff.*Fz./self.Fz0 + self.Dreff.*atan(self.Breff.*Fz./self.Fz0));
-            Vcx = V(1); Vcy = V(2); Vsx = Vcx - re.*omega;
             Fz0dash = self.Fz0;
             dfz = (Fz - Fz0dash)./Fz0dash;
             camber1 = sin(self.camber);
-            alpha1 = delta - ((Vcy+a*psidot)/Vcx);
+            alpha1 = zeros([4,1]);
+            for i = 1:4
+                Vcx = (V(1)*cos(delta(i))-V(2)*sin(delta(i))); Vcy = V(1)*sin(delta(i))+V(2)*cos(delta(i)); Vsx = Vcx - re.*omega;
+                %alpha1(i) = (delta - ((Vcy+a*psidot)/Vcx))*(Vcy+1e-6)/abs(Vcy+1e-6);
+                alpha1(i) = atan(-Vcy/Vcx);
+            end
             k = -Vsx./abs(Vcx);
             %%Longitudinal Force
             %%Pure Slip
