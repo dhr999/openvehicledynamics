@@ -84,7 +84,7 @@ classdef Tirepacejkacombined  % Based on MF-Tire 6.1 by TNO, The Netherlands
             self.camber = -0;
             self.Iw = 1.1;
         end
-        function[fx,fy] = tireforce(self,V,omega,Fz,delta)
+        function[fx,fy] = tireforce(self,V,omega,Fz,delta,dist,psidot)
             %         function[fx,fy] = tireforce(self,k,alpha1,Fz)
             dpi = (pi-self.pi0)./self.pi0;
             cz = self.cz0.*(1+self.pFz1.*dpi);
@@ -95,7 +95,12 @@ classdef Tirepacejkacombined  % Based on MF-Tire 6.1 by TNO, The Netherlands
             camber1 = sin(self.camber);
             alpha1 = zeros([4,1]);
             for i = 1:4
-                Vcx = (V(1)*cos(delta(i))-V(2)*sin(delta(i))); Vcy = V(1)*sin(delta(i))+V(2)*cos(delta(i)); Vsx = Vcx - re.*omega;
+                if i <= 2
+                   Vy = V(2) + dist(1)*psidot;
+                elseif i > 2
+                    Vy = V(2) - dist(2)*psidot;
+                end
+                Vcx = (V(1)*cos(delta(i))-Vy*sin(delta(i))); Vcy = V(1)*sin(delta(i))+Vy*cos(delta(i)); Vsx = Vcx - re.*omega;
                 %alpha1(i) = (delta - ((Vcy+a*psidot)/Vcx))*(Vcy+1e-6)/abs(Vcy+1e-6);
                 alpha1(i) = atan(-Vcy/Vcx);
             end

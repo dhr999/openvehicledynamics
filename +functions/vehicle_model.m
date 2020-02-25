@@ -20,6 +20,7 @@ classdef vehicle_model
             self.Iw = 1.1;
         end
         function[state] = vehicle(self, driver_input)
+            dist = [self.a  self.b];
             g = 9.81;
             Ixx = self.Ix;
             Iyy = self.Iy;
@@ -48,7 +49,7 @@ classdef vehicle_model
                 delta = [driver_input(z,3);driver_input(z,4);0;0];
                 [~,omega] = ode45(@wheeldyna,[ti tf],omega);
                 omega = omega(end,:)';
-                [fx,fy] = tyre.tireforce(V,omega,Fz,delta);
+                [fx,fy] = tyre.tireforce(V,omega,Fz,delta,dist,state(z,6));
                 Fx = fx(1)*cos(delta(1)) - fy(1)*sin(delta(1)) + fx(2)*cos(delta(2)) - fy(2)*sin(delta(2)) + fx(3) + fx(4);
                 Fy = fy(1)*cos(delta(1)) + fx(1)*sin(delta(1)) + fy(2)*cos(delta(2)) + fx(2)*sin(delta(2)) + fy(3) + fy(4);
                 Mz = self.a*(fy(1)*cos(delta(1)) + fx(1)*sin(delta(1)) + fy(2)*cos(delta(2)) + fx(2)*sin(delta(2))) - self.b*(fy(3) + fy(4)) + self.t*(-fx(1)*cos(delta(1)) + fy(1)*sin(delta(1)) + fx(2)*cos(delta(2)) - fy(2)*sin(delta(2)) - fx(3) + fx(4));
@@ -59,7 +60,6 @@ classdef vehicle_model
                 ti=tf;
                 tf = ti + tstep;
             end
-            
             %% Wheel Dynamics
             function dy = wheeldyna(~,~)
                 dy =  (T - self.r0*fx)/self.Iw;
