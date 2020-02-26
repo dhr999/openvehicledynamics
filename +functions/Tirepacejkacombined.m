@@ -98,11 +98,11 @@ classdef Tirepacejkacombined  % Based on MF-Tire 6.1 by TNO, The Netherlands
                 if i <= 2
                    Vy = V(2) + dist(1)*psidot;
                 elseif i > 2
-                    Vy = V(2) - dist(2)*psidot;
+                   Vy = V(2) - dist(2)*psidot;
                 end
                 Vcx = (V(1)*cos(delta(i))-Vy*sin(delta(i))); Vcy = V(1)*sin(delta(i))+Vy*cos(delta(i)); Vsx = Vcx - re.*omega;
                 %alpha1(i) = (delta - ((Vcy+a*psidot)/Vcx))*(Vcy+1e-6)/abs(Vcy+1e-6);
-                alpha1(i) = atan(-Vcy/Vcx);
+                alpha1(i) = atan(-Vcy/abs(Vcx));
             end
             k = -Vsx./abs(Vcx);
             %%Longitudinal Force

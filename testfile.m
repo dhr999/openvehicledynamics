@@ -1,7 +1,6 @@
 clc
-v = functions.vehicle_model;
 tic;
-state = v.vehicle(driver_input);
+state = v.vehicle(drive_straight);
 toc;
 
 figure(1)

@@ -38,7 +38,7 @@ classdef vehicle_model
             steps = (end_time - ti)/tstep;
             %% Init Cond
             state = zeros([steps 8]);
-            state(z,7:8) = [30 0]*5/18;
+            state(z,7:8) = [100 0]*5/18;
             V = state(z,7:8);
             omega = V(1)/self.r0*ones([4 1]);
             Fz = self.m/4*ones([4 1]);
