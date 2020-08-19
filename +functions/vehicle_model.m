@@ -16,10 +16,10 @@ classdef vehicle_model
             self.Dphi = 6e3;
             self.Ktheta = 60e3;
             self.Dtheta = 3000e3;
-            self.r0 = 0.2986;
+            self.r0 = 0.3135;%0.2986
             self.Iw = 1.1;
         end
-        function[state] = vehicle(self, driver_input)
+        function[state,alpha] = vehicle(self, driver_input)
             dist = [self.a  self.b];
             g = 9.81;
             Ixx = self.Ix;
@@ -28,17 +28,18 @@ classdef vehicle_model
             Iyz = Iyy - Izz;
             Ixy = Ixx - Iyy;
             h = self.hcg - self.zcg;
-            tyre = functions.Tirepacejkacombined;
+            tyre = functions.Tirepacejka;
             
             ti = 0;
-            tstep = 0.005;
+            tstep = 0.0025;
             tf = ti + tstep;
-            end_time = 20;
+            end_time = 10;
             z = 1;
             steps = (end_time - ti)/tstep;
             %% Init Cond
             state = zeros([steps 8]);
-            state(z,7:8) = [100 0]*5/18;
+            alpha = zeros([steps 4]);
+            state(z,7:8) = [50 0]*5/18;     %Intial velocity(x,y) in kmph
             V = state(z,7:8);
             omega = V(1)/self.r0*ones([4 1]);
             Fz = self.m/4*ones([4 1]);
@@ -49,11 +50,12 @@ classdef vehicle_model
                 delta = [driver_input(z,3);driver_input(z,4);0;0];
                 [~,omega] = ode45(@wheeldyna,[ti tf],omega);
                 omega = omega(end,:)';
-                [fx,fy] = tyre.tireforce(V,omega,Fz,delta,dist,state(z,6));
+                [fx,fy,alpha1] = tyre.tireforce(V,omega,Fz,delta,dist,state(z,6));%,self.t/2,state(z,3));%);
                 Fx = fx(1)*cos(delta(1)) - fy(1)*sin(delta(1)) + fx(2)*cos(delta(2)) - fy(2)*sin(delta(2)) + fx(3) + fx(4);
                 Fy = fy(1)*cos(delta(1)) + fx(1)*sin(delta(1)) + fy(2)*cos(delta(2)) + fx(2)*sin(delta(2)) + fy(3) + fy(4);
                 Mz = self.a*(fy(1)*cos(delta(1)) + fx(1)*sin(delta(1)) + fy(2)*cos(delta(2)) + fx(2)*sin(delta(2))) - self.b*(fy(3) + fy(4)) + self.t*(-fx(1)*cos(delta(1)) + fy(1)*sin(delta(1)) + fx(2)*cos(delta(2)) - fy(2)*sin(delta(2)) - fx(3) + fx(4));
                 [~,y] = ode45(@bodydyna,[ti tf],(state(z,:))');
+                alpha(z,:) = alpha1;
                 z=z+1;
                 state(z,:) = y(end,:);
                 V = state(z,7:8);

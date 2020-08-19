@@ -24,7 +24,7 @@ classdef Tirepacejka
             self.c9 = 0.3;
             self.c10 = 0;
             self.c11 = 4;
-            self.camber = pi./18;
+            self.camber = 0;
             self.r = 0.3135;
         end
         function[fx,fy,Mz] = tireforce(self,V,omega,Fz,delta,a,psidot)
@@ -32,6 +32,7 @@ classdef Tirepacejka
             mux = 1.1;muy=1.3;
             Vcx = V(1); Vcy = V(2); Vsx = Vcx - self.r.*omega;
             alpha = delta - ((Vcy+a.*psidot)./Vcx);
+            alpha = alpha(:,1);
             k = -Vsx./abs(Vcx);
             Cfa0 = 30e3;
             Cfa = self.c1.*self.c2.*self.Fz0.*sin(2.*atan(Fz./(self.c2.*self.Fz0)));
