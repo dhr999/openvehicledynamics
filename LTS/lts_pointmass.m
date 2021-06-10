@@ -38,7 +38,7 @@ for i = 1:steps-1
     gear_ratio = interp1(Gear,Gear_ratio,gear(i));
     engine_speed(i) = min(vel(i)/tire_radius*gear_ratio*30/pi,18000);
     drive_power(i) = interp1(E_speed,E_power,engine_speed(i),'spline')*0.93;
-    propel_force = (drive_power(i)/vel(i)) - drag(i);
+    propel_force = min((drive_power(i)/vel(i)),sqrt(abs((Mu*normal_force)^2 - (Mass*vel(i)^2/radius(i))^2))/2) - drag(i);
     max_speed(i) = sqrt(vel(i)^2 + 2*sector_length/Mass*propel_force);
     max_corner_speed(i) = power(((Mu*normal_force)^2/((Mass/radius(i))^2 + (drag(i)/vel(i)^2)^2)),0.25);
     vel(i+1) = min(max_corner_speed(i),max_speed(i));
@@ -84,7 +84,7 @@ for i = 1:steps-1
         longi_acc(i) = 1e-5;
     end
     sector_time(i) = (-vel(i) + sqrt(vel(i)^2 + 2*longi_acc(i)*sector_length))/longi_acc(i);
-    lateral_acc(i) = sign(vel(i))*vel(i)^2/radius(i);
+    lateral_acc(i) = sign_radius_buddha(i)*vel(i)^2/radius(i);
 end
 lateral_acc(end) = sign(vel(i))*vel(end)^2/radius(end);
 

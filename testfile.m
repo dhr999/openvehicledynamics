@@ -1,12 +1,12 @@
 clc
 v = functions.vehicle_model;
 tic;
-input = driver_input;
-[state,alpha] = v.vehicle(input);
+input = drive_straight;
+[~,vel,alpha] = v.vehicle(input);
 toc;
 
 figure(1)
-plot(linspace(0,end_time,4000),state(:,7)*18/5)
+plot(linspace(0,end_time,4000),vel(:,1)*18/5)
 hold on
 plot(linspace(0,end_time,4000),input(:,1)/20)
 grid on
@@ -15,7 +15,7 @@ xlabel('Time')
 ylabel('Longitudinal Speed')
 
 figure(2)
-plot(linspace(0,end_time,4000),state(:,8)*18/5)
+plot(linspace(0,end_time,4000),vel(:,2)*18/5)
 hold on
 plot(linspace(0,end_time,4000),input(:,3))
 grid on

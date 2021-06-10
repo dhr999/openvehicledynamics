@@ -19,7 +19,7 @@ classdef vehicle_model
             self.r0 = 0.3135;%0.2986
             self.Iw = 1.1;
         end
-        function[state,alpha] = vehicle(self, driver_input)
+        function[state,vel,alpha] = vehicle(self, driver_input)
             dist = [self.a  self.b];
             g = 9.81;
             Ixx = self.Ix;
@@ -38,8 +38,10 @@ classdef vehicle_model
             steps = (end_time - ti)/tstep;
             %% Init Cond
             state = zeros([steps 8]);
+            vel = zeros([steps 2]);
             alpha = zeros([steps 4]);
             state(z,7:8) = [50 0]*5/18;     %Intial velocity(x,y) in kmph
+            vel(z,:) = state(z,7:8);
             V = state(z,7:8);
             omega = V(1)/self.r0*ones([4 1]);
             Fz = self.m/4*ones([4 1]);
@@ -61,7 +63,9 @@ classdef vehicle_model
                 V = state(z,7:8);
                 ti=tf;
                 tf = ti + tstep;
+                vel(z,:) = [state(z,7),state(z,8)]*[cos(state(z,3)),-sin(state(z,3));-sin(state(z,3)),cos(state(z,3))];
             end
+            
             %% Wheel Dynamics
             function dy = wheeldyna(~,~)
                 dy =  (T - self.r0*fx)/self.Iw;

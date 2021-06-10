@@ -1,10 +1,6 @@
 T = Tirepacejkacombined_test;
-alpha = 0.0574;
-k = 0.02;
-tic
-[~,fy] = T.tireforce(k,alpha,5000);
-toc
 
-tic
-fy1 = fittedmodel(k,alpha);
-toc
+
+[alpha,k,load] = meshgrid(-15*pi/180:0.01:15*pi/180,-2:0.01:2,300*9.81:50:1000*9.81);
+
+[fx,~] = T.tireforce(k,alpha,load);
